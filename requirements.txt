@@ -1,0 +1,10 @@
+# Core framework and dependencies
+fastapi
+pydantic
+
+# Google Vertex AI SDK
+google-cloud-aiplatform
+google-generativeai
+
+# HTTP requests
+requests
