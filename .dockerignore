@@ -1,0 +1,30 @@
+# .dockerignore
+
+# Git
+.git
+.gitignore
+
+# Python cache
+__pycache__/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Docker files
+docker-compose*.yml
+
+# Logs and runtime data
+*.log
+*.sqlite3
+/output/
+*.pid
+
+# IDE/editor directories
+.vscode/
+.idea/
+
+# Secrets
+*.pem
+*.key
+*.json
