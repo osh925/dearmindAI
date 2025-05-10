@@ -1,5 +1,5 @@
 # Core framework and dependencies
-fastapi
+fastapi[uvicorn]
 pydantic
 
 # Google Vertex AI SDK

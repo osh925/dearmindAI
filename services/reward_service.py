@@ -17,7 +17,9 @@ from time import sleep
 # ─── CONFIG & INIT (run once per process) ───────────────────────────────────────
 PROJECT_ID = "sc2025-test"
 REGION     = "us-central1"
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./sc2025-test-2612809344af.json"
+# CREDS      = "./sc2025-test-2612809344af.json"
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = CREDS
+## GCP Automatically detects service account (I hope so)
 
 vertexai.init(project=PROJECT_ID, location=REGION)
 
