@@ -14,12 +14,12 @@ from vertexai.preview.generative_models import GenerativeModel, Part
 import vertexai.preview.generative_models as generative_models
 from time import sleep
 
+from PIL import Image
+import requests
+
 # ─── CONFIG & INIT (run once per process) ───────────────────────────────────────
 PROJECT_ID = "sc2025-test"
 REGION     = "us-central1"
-# CREDS      = "./sc2025-test-2612809344af.json"
-# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = CREDS
-## GCP Automatically detects service account (I hope so)
 
 vertexai.init(project=PROJECT_ID, location=REGION)
 
@@ -42,7 +42,7 @@ SAFETY = {
 
 # ─── MAIN SERVICE FUNCTION ─────────────────────────────────────────────────────
 def generate_reward(
-    user_images_b64: list[str],
+    user_images: list[str],
     art_style: str,
     diaries: Optional[list[str]] = None,
     retry_attempts: int = 3
@@ -90,20 +90,36 @@ def generate_reward(
 
     # 4) Encode the reward image to base64
     img_bytes = None
-    pil_img = getattr(reward_img, "image", None)
+
+    # reward_img 자체가 PIL 이미지인 경우
+    if isinstance(reward_img, Image.Image):
+        pil_img = reward_img
+
+    # reward_img.image 속성에 PIL 이미지가 담겨있는 경우
+    elif hasattr(reward_img, "image") and isinstance(reward_img.image, Image.Image):
+        pil_img = reward_img.image
+
+    else:
+        pil_img = None
+
     if pil_img:
+        # 메모리 버퍼에 PNG로 저장
         buf = BytesIO()
         pil_img.save(buf, format="PNG")
         img_bytes = buf.getvalue()
     else:
-        # Fallback: write to temp file
+        # Fallback: 임시 파일에 저장 후 읽기
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
             try:
-                reward_img.save(tmp.name)  # only accepts path
+                # reward_img.save(path) 만 지원하는 객체라면 이 분기로 옴
+                reward_img.save(tmp.name)
                 tmp.flush()
-                img_bytes = open(tmp.name, "rb").read()
+                with open(tmp.name, "rb") as f:
+                    img_bytes = f.read()
             finally:
                 os.unlink(tmp.name)
+
+    # 최종 Base64 인코딩 결과
     reward_b64 = base64.b64encode(img_bytes).decode("utf-8")
 
     # 5) Prepare parts for letter generation
@@ -119,9 +135,21 @@ def generate_reward(
     parts = [Part.from_text(letter_prompt)]
 
     # 6) Decode user-uploaded images (for context) and append
-    for b64 in user_images_b64:
-        img_data = base64.b64decode(b64)
-        parts.append(Part.from_data(data=img_data, mime_type="image/png"))
+    for img_str in user_images:
+        try:
+            if img_str.startswith("http://") or img_str.startswith("https://"):
+                # URL 인 경우 HTTP GET
+                resp = requests.get(img_str, timeout=5)
+                resp.raise_for_status()
+                img_bytes = resp.content
+            else:
+                # Base64 인 경우 디코딩
+                img_bytes = base64.b64decode(img_str)
+        except Exception as e:
+            raise RuntimeError(f"사용자 이미지 처리 중 오류: {e}")
+
+        # MIME type 추론(필요시). 여기서는 PNG 고정
+        parts.append(Part.from_data(data=img_bytes, mime_type="image/png"))
 
     # 7) Call Gemini to generate the letter
     resp = TEXT_MODEL.generate_content(

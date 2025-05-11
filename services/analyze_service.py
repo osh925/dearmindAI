@@ -14,9 +14,6 @@ from vertexai.preview import rag
 # ─── CONFIG & INIT ─────────────────────────────────────────────────────────────
 PROJECT_ID = "sc2025-test"
 REGION     = "us-central1"
-# CREDS      = "./sc2025-test-2612809344af.json"
-# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = CREDS
-## GCP Automatically detects service account (I hope so)
 
 vertexai.init(project=PROJECT_ID, location=REGION)
 
