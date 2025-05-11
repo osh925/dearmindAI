@@ -5,21 +5,23 @@ from typing import List, Mapping, Optional
 HISTORY_URL = "https://dearmind-be.onrender.com/chat/history"
 DIARY_URL   = "https://dearmind-be.onrender.com/diary/by-date"
 
-def fetch_chat_history() -> List[Mapping[str, str]]:
+def fetch_chat_history(token: str) -> List[Mapping[str, str]]:
     """
     Returns a list of dicts like {"role":"user"|"assistant","content": "..."}
     """
-    resp = requests.get(HISTORY_URL, timeout=5)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = requests.get(HISTORY_URL, headers=headers, timeout=5)
     resp.raise_for_status()
     return resp.json()
 
-def fetch_diary_by_date(date: Optional[str] = None) -> List[str]:
+def fetch_diary_by_date(token: str, date: Optional[str] = None) -> List[str]:
     """
     Returns the diary entries for the given date (ISO YYYY-MM-DD).
     If no `date` is provided, uses today’s date.
     """
     date = date or datetime.date.today().isoformat()
-    resp = requests.get(f"{DIARY_URL}?date={date}", timeout=5)
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = requests.get(f"{DIARY_URL}?date={date}", headers=headers, timeout=5)
     resp.raise_for_status()
     data = resp.json()
     # normalize into a list of strings

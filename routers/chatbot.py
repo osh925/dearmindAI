@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel, Field
 from services.chatbot_service import chat_with_history, get_initial_greeting
+from utils.auth import extract_bearer_token
 
 router = APIRouter()
 
@@ -23,12 +24,13 @@ async def init_chat():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(req: ChatRequest):
+async def chat_endpoint(req: ChatRequest, request: Request):
     """
     Called whenever the user sends a new message.
     """
     try:
-        answer = chat_with_history(req.message)
+        token = extract_bearer_token(request)
+        answer = chat_with_history(req.message, token)
         return ChatResponse(reply=answer)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

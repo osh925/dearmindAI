@@ -32,7 +32,7 @@ def get_initial_greeting() -> str:
     """
     return STATIC_GREETING
 
-def chat_with_history(user_message: str) -> str:
+def chat_with_history(user_message: str, token: str) -> str:
     """
     1) Fetch prior chat turns (up to ~20) from external service.
     2) Fetch today’s diary entries and inject them into the system context.
@@ -41,10 +41,10 @@ def chat_with_history(user_message: str) -> str:
        then send the new user message and return the assistant’s reply.
     """
     # 1) Fetch chat history
-    history_json = fetch_chat_history()
+    history_json = fetch_chat_history(token=token)
 
     # 2) Always fetch today’s diary and append to system context
-    diaries = fetch_diary_by_date()
+    diaries = fetch_diary_by_date(token=token)
     diaries = []
     diary_block = "\n".join(f"- {d}" for d in diaries)
     extended_system = SYSTEM_INSTRUCTION
