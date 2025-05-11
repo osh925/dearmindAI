@@ -43,6 +43,7 @@ def extract_emotion_severity(output: str) -> tuple[str, str]:
     """
     Parse out a JSON array ["emotion","severity"] from the model output.
     Fall back to a simple keyword scan if parsing fails.
+    Internally uses lowercase emotion/severity, but returns uppercase mapped values.
     """
     # 1) Strict JSON array match
     m = re.search(
@@ -52,17 +53,36 @@ def extract_emotion_severity(output: str) -> tuple[str, str]:
         flags=re.IGNORECASE
     )
     if m:
-        return m.group("emotion").lower(), m.group("severity").lower()
+        raw_emo = m.group("emotion").lower()
+        raw_sev = m.group("severity").lower()
+    else:
+        # 2) Keyword fallback
+        low = output.lower()
+        found = False
+        for emo in ("positive","depressed","anxious","angry"):
+            if emo in low:
+                raw_emo = emo
+                raw_sev = "emergency" if "emergency" in low else "safe"
+                found = True
+                break
+        if not found:
+            # 3) Default
+            raw_emo, raw_sev = "positive", "safe"
 
-    # 2) Keyword fallback
-    low = output.lower()
-    for emo in ("positive","depressed","anxious","angry"):
-        if emo in low:
-            sev = "emergency" if "emergency" in low else "safe"
-            return emo, sev
+    # 매핑 테이블: 내부 raw → 최종 반환값
+    EMOTION_MAP = {
+        "positive": "HAPPY",
+        "depressed": "GLOOMY",
+        "anxious": "ANXIOUS",
+        "angry":   "ANGRY",
+    }
+    SEVERITY_MAP = {
+        "safe":      "SAFE",
+        "emergency": "EMERGENCY",
+    }
 
-    # 3) Default
-    return "positive", "safe"
+    # 최종 반환은 매핑된 대문자 값
+    return EMOTION_MAP.get(raw_emo, raw_emo.upper()), SEVERITY_MAP.get(raw_sev, raw_sev.upper())
 
 
 def analyze_diary(
