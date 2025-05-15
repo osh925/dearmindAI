@@ -1,29 +1,11 @@
 # DearMind-AI
 
+FastAPI based AI Model Server for DearMind - Google Solution Challenge 2025
+
 ---
 
 ## Project Description
 🎨 AI API for DearMind, an emotion-based arts therapy service
-
-## Directory Structure
-├── Dockerfile   
-├── README.md   
-├── main.py # FastAPI app entrypoint   
-├── requirements.txt   
-│   
-├── routers/   
-│ ├── analyze.py # /ai/analyze   
-│ ├── reward.py # /ai/reward   
-│ └── chatbot.py # /ai/chat, /ai/chat/init   
-│   
-├── services/   
-│ ├── analyze_service.py # AI based arts therapy analysis (image+text → [emotion, severity])   
-│ ├── reward_service.py # Reward image + letter generation   
-│ └── chatbot_service.py # Chatbot   
-│   
-└── utils/   
-├── auth.py    
-└── utils.py    
 
 ## Project Setup
 
