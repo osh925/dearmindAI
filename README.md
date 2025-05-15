@@ -1,6 +1,6 @@
 # DearMind-AI
 
-FastAPI based AI Model Server for DearMind - Google Solution Challenge 2025
+FastAPI powered AI Model Server for DearMind - Google Solution Challenge 2025
 
 ## Project Description
 🎨 AI API for DearMind, an emotion-based arts therapy service
