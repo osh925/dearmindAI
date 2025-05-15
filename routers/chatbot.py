@@ -28,6 +28,9 @@ async def chat_endpoint(req: ChatRequest, request: Request):
     """
     Called whenever the user sends a new message.
     """
+    print(">> Authorization header:", request.headers.get("Authorization"))
+    if request.headers.get("Authorization") is None:
+        print("Full request: ", request.headers)
     try:
         token = extract_bearer_token(request)
         answer = chat_with_history(req.message, token)

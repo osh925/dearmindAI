@@ -10,6 +10,7 @@ def fetch_chat_history(token: str) -> List[Mapping[str, str]]:
     Returns a list of dicts like {"role":"user"|"assistant","content": "..."}
     """
     headers = {"Authorization": f"Bearer {token}"}
+    print(f"[fetch_chat_history] GET {HISTORY_URL} with headers={headers}")
     resp = requests.get(HISTORY_URL, headers=headers, timeout=5)
     resp.raise_for_status()
     return resp.json()
@@ -21,6 +22,7 @@ def fetch_diary_by_date(token: str, date: Optional[str] = None) -> List[str]:
     """
     date = date or datetime.date.today().isoformat()
     headers = {"Authorization": f"Bearer {token}"}
+    print(f"[fetch_diary_by_date] GET {DIARY_URL}?date={date} with headers={headers}")
     resp = requests.get(f"{DIARY_URL}?date={date}", headers=headers, timeout=5)
     resp.raise_for_status()
     data = resp.json()

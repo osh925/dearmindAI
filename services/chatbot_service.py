@@ -42,7 +42,6 @@ def chat_with_history(user_message: str, token: str) -> str:
 
     # 2) Always fetch today’s diary and append to system context
     diaries = fetch_diary_by_date(token=token)
-    diaries = []
     diary_block = "\n".join(f"- {d}" for d in diaries)
     extended_system = SYSTEM_INSTRUCTION
     if diary_block:
