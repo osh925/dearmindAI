@@ -4,6 +4,11 @@ from google import genai
 from google.genai.types import GenerateContentConfig, Content, Part as GenaiPart
 from utils.utils import fetch_chat_history, fetch_diary_by_date
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # ─── INIT GENAI CLIENT ─────────────────────────────────────────────────────────
 PROJECT_ID = "sc2025-test"
 REGION     = "us-central1"
@@ -39,10 +44,12 @@ def chat_with_history(user_message: str, token: str) -> str:
     """
     # 1) Fetch chat history
     history_json = fetch_chat_history(token=token)
-
+    print("breakpoint: fetch history: ", history_json)
     # 2) Always fetch today’s diary and append to system context
     diaries = fetch_diary_by_date(token=token)
+    print("breakpoint: fetch diary: ", diaries)
     diary_block = "\n".join(f"- {d}" for d in diaries)
+    print("breakpoint: parse diary result: ", diary_block)
     extended_system = SYSTEM_INSTRUCTION
     if diary_block:
         extended_system += "\n\nUser's diary for today:\n" + diary_block
@@ -61,6 +68,8 @@ def chat_with_history(user_message: str, token: str) -> str:
             )
         )
 
+    print("breakpoint: append history")
+
     # 5) Start a new chat with persona+diary context + prior history
     chat = client.chats.create(
         model="gemini-2.0-flash",
@@ -68,6 +77,9 @@ def chat_with_history(user_message: str, token: str) -> str:
         history=history
     )
 
+    print("breakpoint: initiate chat session")
+
     # 6) Send the new user message
     response = chat.send_message(user_message)
+    print("breakpoint: generate response")
     return response.text
